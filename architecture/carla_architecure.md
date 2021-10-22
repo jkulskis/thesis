@@ -190,3 +190,35 @@ Sensors can return various types of data from an object that is inherited from t
   } // namespace carla
   ```
 </details>
+
+## Client-server synchrony
+By default, CARLA runs in asynchronous mode, where the server runs the simulation as fast as possible, where the timing is independent of any client input. It is also possible to run on synchronous mode, where the server waits for a client tick, before proceeding to the next simulation step.
+
+We can change between asynchronous and synchronous mode easily with the world object.
+
+```python
+settings = world.get_settings()
+settings.synchronous_mode = True # Enables synchronous mode
+world.apply_settings(settings)
+```
+
+### Physics determinism
+In order to have a deterministic simulation, the client music be in perfect sync with the server (synchronous mode), and a constant time step has to be applied correctly. (can apply with `fixed_delta_seconds` world setting)
+
+
+# Visuals
+
+## Carla Architecture
+
+![carla_architecture](img/carla_architecture.png)
+
+## Carla Action diagram: 
+
+![carla_architecture](img/carla_action_vehicle_control.png)
+
+## Project High Level Visualization
+
+![PDRR Visualization](img/PDRR_Visualization.png)
+
+
+
