@@ -4,12 +4,13 @@ from collections import deque
 from typing import List, Deque
 from enum import Enum
 
-END_CHAR = "#"
+END_CHAR = "\n"
 
 
 class Device(Enum):
     turntable = 0
-    imu = 1
+    car = 1
+    imu = 2
 
 
 class ArdCommand:
@@ -62,6 +63,33 @@ class TurntableCommand(ArdCommand):
             ack_timeout=ack_timeout,
         )
 
+class CarCommand(ArdCommand):
+    def __init__(
+        self,
+        motor_value: int,
+        steering: bool = False,
+        ack_timeout: float = 0.0,
+    ):
+        """_summary_
+
+        Args:
+            motor_value (int): Value to send to motor on car
+            steering (bool): Send to steering servo rather than main motor ESC
+            ack_timeout (float, optional): Wait for an ack for this amount of time in seconds. If 0, not expecting an ack
+        """
+        if steering:
+            if motor_value < 60 or motor_value > 120:
+                raise ValueError(f"Invalid steering motor value: {motor_value}. Must be in range [60, 120]")
+        elif motor_value < 1000 or motor_value > 1700:
+            raise ValueError(f"Invalid main motor value: {motor_value}. Must be in range [1000, 1700]")
+        self.steering = steering
+        self.motor_value = int(motor_value)
+        super().__init__(
+            device_name="car",
+            instruction=f"{0 if not self.steering else 1}-{self.motor_value}",
+            ack_timeout=ack_timeout,
+        )
+
 
 class Arduino:
     def __init__(self, port="/dev/ttyACM0", timeout=5, baudrate=9600):
@@ -79,8 +107,8 @@ class Arduino:
             )
         # priority to command passed as param, otherwise pop from the command queue
         command_to_send = command if command is not None else self.commands.popleft()
-        ard.flush()
-        ard.write(str(command).encode())
+        self.ard.flush()
+        self.ard.write(str(command).encode())
         send_time = time.time()
         if command.ack_timeout:  # only expecting ack if we have a timeout > 0
             prev_timeout = self.ard.timeout
@@ -95,7 +123,7 @@ class Arduino:
         """Read until the end character if timeout is 0, otherwise read until timeout
         """
         if timeout:
-            return self.ard.read(timeout=timeout)
+            self.ard.timeout = timeout
         return self.ard.read_until(expected=END_CHAR)
 
 
