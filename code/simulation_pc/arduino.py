@@ -118,6 +118,13 @@ class Arduino:
             )  # read until we see the end char or until we timeout
             self.ard.timeout = prev_timeout  # reset back to old timeout rather than command specific ack timeout
         self.command_history.append(command)
+
+    def send_all_commands(self):
+        if not self.commands:
+            raise ValueError("Need to add a command to the queue")
+        while self.commands:
+            self.send_command()
+
     
     def read(self, timeout=0):
         """Read until the end character if timeout is 0, otherwise read until timeout
@@ -128,6 +135,20 @@ class Arduino:
 
 
 if __name__ == "__main__":
-    # testing purposes
-    print(ArdCommand(device_name="IMU", instruction="dummy-instruction"))
-    print(TurntableCommand(direction=0, speed=20, turn_time=2.3))
+
+    # Initialize an arduino on port /dev/ttyACM0
+    ard = Arduino(port="/dev/ttyACM0", timeout=0.1, baudrate=9600)
+    # car main motor PWM value of 1630 μs
+    ard.add_command(CarCommand(motor_value=1630))
+    # car steering angle of 95
+    ard.add_command(CarCommand(motor_value=95, steering=True))
+    # send car commands to the microcontroller
+    ard.send_all_commands()
+    # read any responses. Reads until our expected end char or timeout
+    while response := ard.read(timeout=0.05):
+        print(response)
+
+    # print(ArdCommand(device_name="IMU", instruction="dummy-instruction"))
+    # print(TurntableCommand(direction=0, speed=20, turn_time=2.3))
+    for command in ard.commands:
+        print(command)
