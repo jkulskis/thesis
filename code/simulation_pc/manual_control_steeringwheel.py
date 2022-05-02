@@ -312,14 +312,14 @@ class DualControl(object):
                 self._parse_walker_keys(pygame.key.get_pressed(), clock.get_time())
             world.player.apply_control(self._control)
         
+        new_main_motor_value = 1520 + self._control.throttle * 180
+        if abs((self.motor_values["throttle"] - new_main_motor_value) / self.motor_values["throttle"]) > 0.003:
+            car_main_motor_command = CarCommand(
+                motor_value=new_main_motor_value, steering=False
+            )
+            self.ard.send_command(car_main_motor_command)
+            self.motor_values["throttle"] = new_main_motor_value
         # get the steering motor value in the range [60, 120]
-        # if abs((self.motor_values["throttle"] - (new_main_motor_value := 1550 + self._control.throttle * - 150)) / self.motor_values["throttle"]) > 0.003:
-        #     car_main_motor_command = CarCommand(
-        #         motor_value=new_main_motor_value, steering=False
-        #     )
-        #     self.ard.send_command(car_main_motor_command)
-        #     self.motor_values["throttle"] = new_main_motor_value
-        print(self._control.throttle)
         new_steering_value = 90 + self._control.steer * 15
         if abs(self.motor_values["steer"] - new_steering_value / self.motor_values["steer"]) > 0.003:
             car_steering_command = CarCommand(
@@ -327,8 +327,6 @@ class DualControl(object):
             )
             self.ard.send_command(car_steering_command)
             self.motor_values["steer"] = new_steering_value
-            # print(self._control.steer)
-            # print(new_steering_value)
 
     def _parse_vehicle_keys(self, keys, milliseconds):
         self._control.throttle = 1.0 if keys[K_UP] or keys[K_w] else 0.0
