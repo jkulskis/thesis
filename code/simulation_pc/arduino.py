@@ -145,8 +145,8 @@ if __name__ == "__main__":
     # send car commands to the microcontroller
     ard.send_all_commands()
     # read any responses. Reads until our expected end char or timeout
-    while response := ard.read(timeout=0.05):
-        print(response)
+    # while response := ard.read(timeout=0.05):
+    #     print(response)
 
     # print(ArdCommand(device_name="IMU", instruction="dummy-instruction"))
     # print(TurntableCommand(direction=0, speed=20, turn_time=2.3))

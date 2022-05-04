@@ -149,8 +149,9 @@ class World(object):
         blueprint = random.choice(self.world.get_blueprint_library().filter(self._actor_filter))
         blueprint.set_attribute('role_name', 'hero')
         if blueprint.has_attribute('color'):
-            color = random.choice(blueprint.get_attribute('color').recommended_values)
-            blueprint.set_attribute('color', color)
+            # color = random.choice(blueprint.get_attribute('color').recommended_values)
+            # blueprint.set_attribute('color', color)
+            blueprint.set_attribute('color', '37,78,66')
         # Spawn the player.
         if self.player is not None:
             spawn_point = self.player.get_transform()
@@ -806,7 +807,7 @@ def game_loop(args):
             pygame.HWSURFACE | pygame.DOUBLEBUF)
 
         hud = HUD(args.width, args.height)
-        world = World(client.get_world(), hud, args.filter)
+        world = World(client.get_world(), hud, "vehicle.jeep.wrangler_rubicon")#args.filter)
         controller = DualControl(world, args.autopilot)
 
         clock = pygame.time.Clock()
